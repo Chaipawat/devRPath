@@ -37,7 +37,7 @@ export const metadata: Metadata = {
     siteName,
     title: "DevPath — Developer Knowledge Base",
     description: siteDescription,
-    images: [{ url: "/opengraph-image.png", width: 1200, height: 630, alt: "DevPath — Understand, not memorize." }],
+    images: [{ url: "/opengraph-image.png", width: 1200, height: 630, alt: "DevPath — Understand, not memorize. แมวลาเต้นั่งเขียนโค้ด" }],
   },
   twitter: {
     card: "summary_large_image",
