@@ -18,7 +18,11 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: PageProps<"/part/[slug]">): Promise<Metadata> {
   const { slug } = await params;
   const part = getPart(slug);
-  return part ? { title: `PART ${part.number} — ${part.title}` } : {};
+  return part ? {
+    title: `PART ${part.number} — ${part.title}`,
+    alternates: { canonical: `/part/${part.slug}` },
+    openGraph: { url: `/part/${part.slug}`, title: `PART ${part.number} — ${part.title}` },
+  } : {};
 }
 
 export default async function PartPage({ params }: PageProps<"/part/[slug]">) {
