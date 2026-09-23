@@ -16,7 +16,7 @@ type Seg = [text: string, color: string];
 
 const K = "#ff8a5c", S = "#7fd1a8", F = "#8fa8ff", N = "#e8c060", P = "#f6f4ef", M = "#8f8a80";
 const CODE: Seg[][] = [
-  [["// devpath.ts — pair-coding with Mochi =^.^=", M]],
+  [["// devpath.ts — pair-coding with LATTE =^.^=", M]],
   [["import", K], [" { understand } ", P], ["from", K], [' "devpath"', S], [";", P]],
   [],
   [["const", K], [" you = { level: ", P], ['"junior"', S], [", xp: ", P], ["0", N], [" };", P]],
@@ -36,7 +36,7 @@ const TERMINAL: Seg[][] = [
   [["$ ", S], ["git commit -m \"part 08\"", P]],
   [["$ ", S], ["docker compose up -d", P]],
   [["✓ 3 services running", S]],
-  [["$ ", S], ["mochi review --meow", P]],
+  [["$ ", S], ["LATTE review --meow", P]],
   [["✓ 0 bugs · 3 naps", S]],
 ];
 
@@ -293,7 +293,7 @@ function placeLimb(mesh: THREE.Mesh | null, a: THREE.Vector3, b: THREE.Vector3) 
   mesh.quaternion.setFromUnitVectors(UP, tmp.normalize());
 }
 
-// ───────── Mochi: cream-orange tabby with an AI backpack ─────────
+// ───────── LATTE: cream-orange tabby with an AI backpack ─────────
 const FUR = { light: "#f6dcb4", base: "#efc38a", mid: "#e2a765", dark: "#cf8645", cream: "#fbeedd", pink: "#f2a3a8", nose: "#ee9a9f" };
 const PACK = { shell: "#a9b8dc", face: "#c9d3ec", dark: "#6f7fa8", glow: "#62f3ff" };
 
@@ -428,16 +428,55 @@ function Foreleg({ side, typing, fur }: { side: 1 | -1; typing: RefObject<Typing
   );
 }
 
-// Eye built from layered discs: green-gold iris, tall pupil, two catchlights.
+// Head is a sphere (r .3) scaled [1.14, .94, 1]; eyes must sit exactly on that ellipsoid.
+const HEAD_AXES = new THREE.Vector3(0.3 * 1.14, 0.3 * 0.94, 0.3);
+const EYE_R = 0.058;
+const GAZE = new THREE.Vector3(0, 0.02, -1.4);
+const ORIGIN = new THREE.Vector3();
+
+// Rotation whose +z points along dir while +y stays as close to world-up as possible (no random roll).
+function facing(dir: THREE.Vector3) {
+  const m = new THREE.Matrix4().lookAt(dir, ORIGIN, UP);
+  return new THREE.Quaternion().setFromRotationMatrix(m);
+}
+
+// Glossy eyeball half-sunk into the fur, pupil upright and aimed at a shared point so both eyes converge.
 function Eye({ side }: { side: 1 | -1 }) {
+  const parts = useMemo(() => {
+    const dir = new THREE.Vector3(side * 0.4, 0.12, -0.9).normalize();
+    const k = 1 / Math.sqrt((dir.x / HEAD_AXES.x) ** 2 + (dir.y / HEAD_AXES.y) ** 2 + (dir.z / HEAD_AXES.z) ** 2);
+    const surface = dir.clone().multiplyScalar(k);
+    const normal = new THREE.Vector3(surface.x / HEAD_AXES.x ** 2, surface.y / HEAD_AXES.y ** 2, surface.z / HEAD_AXES.z ** 2).normalize();
+    const ball = surface.clone().addScaledVector(normal, -EYE_R * 0.4);
+    const gaze = GAZE.clone().sub(ball).normalize();
+    const look = facing(gaze);
+    const onBall = (x: number, y: number) => ball.clone().add(new THREE.Vector3(x, y, Math.sqrt(1 - x * x - y * y)).multiplyScalar(EYE_R * 1.01).applyQuaternion(look));
+    return {
+      ball,
+      pupil: ball.clone().addScaledVector(gaze, EYE_R * 0.95),
+      look,
+      glint: onBall(-0.34, 0.4),
+      glintSmall: onBall(0.3, -0.3),
+      rim: surface.clone().addScaledVector(normal, 0.002),
+      rimQuat: facing(normal),
+    };
+  }, [side]);
+
   return (
-    <group position={[side * 0.128, 0.035, -0.262]} rotation={[0.08, Math.PI - side * 0.4, 0]}>
-      <mesh><circleGeometry args={[0.07, 32]} /><meshStandardMaterial color="#2a2418" roughness={0.4} /></mesh>
-      <mesh position={[0, 0, 0.002]}><circleGeometry args={[0.062, 32]} /><meshStandardMaterial color="#c9c46a" emissive="#6b7a2a" emissiveIntensity={0.25} roughness={0.25} /></mesh>
-      <mesh position={[0, 0, 0.004]} scale={[0.62, 1, 1]}><circleGeometry args={[0.045, 32]} /><meshStandardMaterial color="#15130e" roughness={0.2} /></mesh>
-      <mesh position={[-0.02, 0.022, 0.006]}><circleGeometry args={[0.014, 16]} /><meshBasicMaterial color="#ffffff" /></mesh>
-      <mesh position={[0.018, -0.02, 0.006]}><circleGeometry args={[0.006, 12]} /><meshBasicMaterial color="#ffffff" /></mesh>
-    </group>
+    <>
+      <mesh position={parts.ball}>
+        <sphereGeometry args={[EYE_R, 32, 32]} />
+        <meshPhysicalMaterial color="#c8c35e" roughness={0.15} clearcoat={1} clearcoatRoughness={0.05} emissive="#5c6a1c" emissiveIntensity={0.18} />
+      </mesh>
+      <mesh position={parts.pupil} quaternion={parts.look} scale={[0.42, 0.86, 0.22]}>
+        <sphereGeometry args={[EYE_R * 0.62, 24, 24]} />
+        <meshStandardMaterial color="#14120d" roughness={0.1} />
+      </mesh>
+      <mesh position={parts.glint}><sphereGeometry args={[EYE_R * 0.19, 12, 12]} /><meshBasicMaterial color="#ffffff" /></mesh>
+      <mesh position={parts.glintSmall}><sphereGeometry args={[EYE_R * 0.085, 8, 8]} /><meshBasicMaterial color="#ffffff" /></mesh>
+      {/* dark rim where the lid meets the eye */}
+      <mesh position={parts.rim} quaternion={parts.rimQuat}><torusGeometry args={[EYE_R * 0.93, 0.0075, 10, 40]} /><meshStandardMaterial color="#6b4424" roughness={0.6} /></mesh>
+    </>
   );
 }
 
@@ -450,17 +489,16 @@ function MochiHead() {
   useFrame(({ clock }, delta) => {
     if (!head.current || !eyes.current) return;
     const t = clock.elapsedTime;
-    // Every 10s Mochi turns round to check on you, then goes back to "work".
+    // Every 10s LATTE turns round to check on you, then goes back to "work".
     const phase = t % 10;
-    const lookBack = phase > 6.2 && phase < 8.8;
+    const lookBack = true || (phase > 6.2 && phase < 8.8);
     head.current.rotation.y = THREE.MathUtils.damp(head.current.rotation.y, lookBack ? -2.1 : Math.sin(t * 0.6) * 0.16, 4, delta);
     head.current.rotation.z = THREE.MathUtils.damp(head.current.rotation.z, lookBack ? 0.22 : Math.sin(t * 1.2) * 0.05, 4, delta);
     head.current.rotation.x = -0.12 + Math.sin(t * 3.8) * 0.018;
     const facingYou = Math.abs(head.current.rotation.y) > 1.5;
     // Slow blink; a content half-squint while looking at you.
-    const blink = t % 3.6 < 0.14 ? 0.08 : facingYou ? 1.12 : 1;
+    const blink = t % 3.6 < 0.14 ? 0.08 : 1;
     eyes.current.scale.y = THREE.MathUtils.damp(eyes.current.scale.y, blink, 18, delta);
-    eyes.current.scale.x = THREE.MathUtils.damp(eyes.current.scale.x, facingYou ? 1.1 : 1, 8, delta);
     ears.current.forEach((ear, i) => {
       if (ear) ear.rotation.z = (i ? -1 : 1) * 0.32 + (facingYou ? Math.sin(t * 18 + i) * 0.12 : 0);
     });
@@ -756,7 +794,7 @@ export default function DevDeskScene3D() {
   }, []);
 
   return (
-    <div ref={ref} className="knowledge-scene dev-scene" role="img" aria-label="ภาพสามมิติของ Mochi แมวส้มสะพายเป้ AI กำลังเขียนโค้ดหน้าจอคอมพิวเตอร์">
+    <div ref={ref} className="knowledge-scene dev-scene" role="img" aria-label="ภาพสามมิติของ LATTE แมวส้มสะพายเป้ AI กำลังเขียนโค้ดหน้าจอคอมพิวเตอร์">
       <Canvas dpr={[1, 1.75]} frameloop={inView ? "always" : "never"} camera={{ position: [3.3, 2.0, 4.5], fov: 42 }}>
         <ambientLight intensity={1.35} />
         <directionalLight position={[4, 7, 5]} intensity={2.1} />

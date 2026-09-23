@@ -59,7 +59,7 @@ export function HomeExperience({ sections }: { sections: BookSection[] }) {
       <div className="hero-constellation hero-scene">
         <HeroScene fallback={<DevDeskSVG />} />
         <div className="scene-caption">
-          <strong><i aria-hidden="true" /> MOCHI IS CODING / {allParts.length} PARTS</strong>
+          <strong><i aria-hidden="true" /> LATTE IS CODING / {allParts.length} PARTS</strong>
           <ul aria-label="สิ่งที่จะได้เรียน">{stack.map((item) => <li key={item}>{item}</li>)}</ul>
         </div>
       </div>

@@ -11,7 +11,7 @@ const chips: [x: number, y: number, text: string, color: string][] = [
 
 export function DevDeskSVG() {
   return (
-    <svg className="dev-desk-svg" viewBox="0 0 600 520" role="img" aria-label="Mochi แมวส้มสะพายเป้ AI กำลังเขียนโค้ด">
+    <svg className="dev-desk-svg" viewBox="0 0 600 520" role="img" aria-label="LATTE แมวส้มสะพายเป้ AI กำลังเขียนโค้ด">
       <ellipse cx="300" cy="496" rx="250" ry="14" fill="#0e0e0e12" />
 
       {/* desk */}
@@ -64,7 +64,7 @@ export function DevDeskSVG() {
       {/* keyboard */}
       <rect x="208" y="324" width="184" height="10" rx="4" fill="#2a2722" />
 
-      {/* Mochi, turned round to say hi */}
+      {/* LATTE, turned round to say hi */}
       <path d="M220 470c0-72 22-118 80-122 58 4 80 50 80 122Z" fill="#efc38a" />
       <g fill="none" stroke="#cf8645" strokeOpacity=".55" strokeWidth="8" strokeLinecap="round">
         <path d="M232 420c10-4 18-4 26 0M234 446c10-4 18-4 26 0M342 420c8-4 16-4 26 0M340 446c8-4 16-4 26 0" />
