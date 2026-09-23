@@ -1,69 +1,26 @@
-import Image from "next/image";
+import Link from "next/link";
+import { HeroIllustration } from "@/components/illustrations/HeroIllustration";
+import { SectionIcon } from "@/components/illustrations/SectionIcon";
+import { getBookSections } from "@/lib/content";
+import { ContinueReading } from "@/components/ReadingMemory";
 
 export default function Home() {
-  return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
-  );
+  const sections = getBookSections();
+  return <main id="main-content" className="home-main">
+    <header className="home-header"><Link className="home-brand" href="/">SD / INTERVIEW READ BOOK</Link></header>
+    <section className="hero"><div className="hero-copy">
+      <p className="eyebrow">ฉบับอ่านทบทวนก่อนสัมภาษณ์งาน</p><h1>Software Developer<br />Interview Read Book</h1>
+      <p>เข้าใจภาพใหญ่ เชื่อม Frontend → Backend → Database → Infrastructure และตอบคำถามสัมภาษณ์อย่างเป็นนักพัฒนา</p>
+      <div className="hero-actions"><Link className="primary-button" href="/part/part-00-big-picture">เริ่มอ่าน PART 0 <span aria-hidden="true">→</span></Link><ContinueReading /></div>
+      <dl className="book-stats"><div><dt>31</dt><dd>PART</dd></div><div><dt>6</dt><dd>หมวดหลัก</dd></div><div><dt>1</dt><dd>ภาพจำใหญ่</dd></div></dl>
+    </div><HeroIllustration /></section>
+    <section className="contents-section" aria-labelledby="contents-title">
+      <div className="section-intro"><p className="eyebrow">BOOK MAP</p><h2 id="contents-title">เลือกเส้นทางที่อยากทบทวน</h2><p>เนื้อหาจัดตามสารบัญต้นฉบับ ตั้งแต่รากฐานไปจนถึงโหมดพร้อมเข้าสัมภาษณ์</p></div>
+      <div className="section-grid">{sections.map((section, index) => <section className="section-card" key={section.kind}>
+        <div className="section-card-heading"><SectionIcon kind={section.kind} /><div><span>0{index + 1}</span><h3>{section.title.replace(/^ส่วนที่\s*\d+\s*[—–-]\s*/, "")}</h3></div></div>
+        <ol>{section.parts.map((part) => <li key={part.slug}><Link href={`/part/${part.slug}`}><span>PART {part.number}</span><strong>{part.title}</strong><i aria-hidden="true">→</i></Link></li>)}</ol>
+      </section>)}</div>
+    </section>
+    <footer className="home-footer"><p>อ่านเพื่อเข้าใจ ไม่ใช่เพื่อท่อง</p><Link href="/part/part-00-big-picture">เริ่มต้นจากภาพใหญ่ →</Link></footer>
+  </main>;
 }

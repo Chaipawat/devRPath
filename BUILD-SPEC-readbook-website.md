@@ -1,6 +1,6 @@
 # Build Spec — Interview Read Book Website (Next.js)
 
-สร้างเว็บอ่านหนังสือจากไฟล์ Markdown ที่มีอยู่แล้ว สไตล์ **minimal** อ่านง่าย เน้นตัวอักษร ไม่มีของตกแต่งเกินจำเป็น
+สร้างเว็บอ่านหนังสือจากไฟล์ Markdown ที่มีอยู่แล้ว สไตล์ **light minimalist + vector art** เข้าถึงง่าย อ่านสบายตา
 
 ## Input
 
@@ -38,12 +38,30 @@
 - **ท้ายหน้า:** ปุ่ม ← PART ก่อนหน้า / PART ถัดไป →
 - **บนสุด:** แถบ reading progress บาง ๆ
 
-## Design (Minimal)
+## Design — Light Minimalist + Vector Art
 
-- พื้นขาว/ครีมอ่อน ตัวอักษรเทาเข้ม ใช้สี accent เดียว มี **dark mode** (ตามระบบ + ปุ่มสลับ)
-- ฟอนต์เนื้อหา: `IBM Plex Sans Thai` หรือ `Noto Sans Thai` ผ่าน `next/font` ขนาด 17–18px, line-height ~1.8
-- ฟอนต์ code/diagram: `JetBrains Mono` หรือ `IBM Plex Mono` และใส่ monospace fallback ที่รองรับภาษาไทย
-- ไม่มี animation เกินจำเป็น ไม่มีภาพประกอบ
+**ธีมสว่างอย่างเดียว ไม่มี dark mode**
+
+- **สี:** พื้นหลังออฟไวท์อุ่น `#FAF8F4` ตัวอักษรหลัก `#1F2937` ตัวอักษรรอง `#6B7280` สี accent หลัก 1 สี (เช่น teal `#0F766E`) และสีรองสำหรับภาพประกอบอีก 2 สีแบบพาสเทล (เช่น peach `#F4B393`, sky `#9CC5E0`)
+- **ฟอนต์:** เนื้อหาใช้ `IBM Plex Sans Thai` หรือ `Noto Sans Thai` ผ่าน `next/font` ขนาด 18px, line-height 1.85 ส่วน code/diagram ใช้ `JetBrains Mono` หรือ `IBM Plex Mono`
+- **ช่องว่าง:** เว้นเยอะ ขอบมน 12–16px เงาบางมากหรือไม่มีเลย เส้นแบ่ง 1px สีอ่อน
+
+**Vector art (flat / line illustration)**
+
+- ทำเป็น **inline SVG** เขียนเองในโปรเจกต์ ห้ามดึงภาพจากภายนอก และห้ามใช้ตัวละครหรือโลโก้ของแบรนด์จริง
+- สไตล์: เส้นหนาเท่ากัน (stroke 2px) รูปทรงเรขาคณิตเรียบง่าย ใช้สีจาก palette ด้านบนเท่านั้น
+- **Hero หน้าแรก:** ภาพคนนั่งอ่านหนังสือ มีกล่อง / ลูกศร / เซิร์ฟเวอร์ลอยรอบ ๆ สื่อถึง Frontend → Backend → Database
+- **ไอคอน 6 ส่วนของสารบัญ:** Foundation = อิฐ, Frontend = หน้าต่างเบราว์เซอร์, Backend = เฟือง, Infrastructure = กล่องซ้อนกัน, คิดแบบ Senior = หลอดไฟ, Interview = ป้ายชื่อ
+- **หัวของแต่ละ PART:** แถบภาพประกอบเล็ก ๆ ใช้ไอคอนของส่วนนั้นในสีอ่อน
+- ภาพประกอบทุกชิ้นเป็นการตกแต่ง ให้ใส่ `aria-hidden="true"`
+
+## Accessibility (ต้องผ่าน)
+
+- contrast ตัวอักษรกับพื้นหลังผ่าน WCAG AA ทุกจุด (≥ 4.5:1 สำหรับเนื้อหา)
+- ใช้งานด้วยคีย์บอร์ดได้ครบ มี focus ring ชัดเจน และมีลิงก์ "ข้ามไปเนื้อหา"
+- เคารพ `prefers-reduced-motion`
+- ปุ่มและลิงก์ที่กดบนมือถือมีขนาดอย่างน้อย 44×44px
+- ใช้ HTML ที่มีความหมาย (`nav`, `main`, `article`, `aside`) และหัวข้อเรียงลำดับถูกต้อง
 
 ## Rendering ที่ต้องทำให้ถูก
 
@@ -68,7 +86,8 @@ app/
   page.tsx             ← หน้าแรก
   part/[slug]/page.tsx ← หน้าเนื้อหา
 lib/content.ts         ← อ่านไฟล์, สร้างลำดับ prev/next, ดึงหัวข้อ
-components/            ← Sidebar, OnThisPage, Search, ProgressBar, ThemeToggle
+components/            ← Sidebar, OnThisPage, Search, ProgressBar
+  illustrations/       ← SVG: Hero + ไอคอน 6 ส่วน
 ```
 
 ## Acceptance Checklist
@@ -78,6 +97,8 @@ components/            ← Sidebar, OnThisPage, Search, ProgressBar, ThemeToggle
 - [ ] ตารางใน PART 27 (Comparison) และ PART 29 (Cheat Sheet) อ่านได้บนมือถือกว้าง 375px
 - [ ] ลิงก์ "← สารบัญ" ท้ายทุก PART กลับหน้าแรกได้
 - [ ] prev/next เรียงถูกตั้งแต่ PART 0 ถึง 30
-- [ ] dark mode อ่านได้ ตัวอักษรกับ code block contrast พอ
+- [ ] ไม่มี dark mode และหน้าตาเหมือนเดิมแม้ระบบตั้งเป็น dark
+- [ ] มี hero illustration บนหน้าแรก และไอคอน SVG ครบ 6 ส่วน
+- [ ] ใช้งานด้วยคีย์บอร์ดล้วนได้ มี focus ring ชัดเจน
 - [ ] ค้นหาคำว่า "401" แล้วเจอ PART 1 และ PART 20
 - [ ] Lighthouse: Accessibility ≥ 95, Performance ≥ 90
