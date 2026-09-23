@@ -1,0 +1,64 @@
+/* Reader (PART pages): the home page's language — per-part accent colour + floating code keywords. Loaded last. */
+
+.reader-layout {
+  /* --accent / --accent-2 are set per part kind on the element; the rest derive from them. */
+  --accent: var(--signal);
+  --accent-2: var(--electric);
+  --accent-ink: color-mix(in srgb, var(--accent) 62%, #000); /* ≥ 4.5:1 on paper for every accent */
+  --accent-soft: color-mix(in srgb, var(--accent) 10%, var(--paper));
+  position: relative;
+  isolation: isolate;
+}
+
+/* ───────── Background: tiny drifting keywords behind the whole page ───────── */
+.reader-keywords { position: fixed; z-index: -1; }
+.reader-keywords span { opacity: calc(var(--alpha) * .6); }
+.reader-keywords .is-signal { color: var(--accent-ink); }
+/* calm behind the reading column, livelier in the margins */
+.reader-keywords { -webkit-mask-image: linear-gradient(90deg, #000 0 20%, #0005 34% 66%, #000 82%); mask-image: linear-gradient(90deg, #000 0 20%, #0005 34% 66%, #000 82%); }
+
+/* ───────── PART header card ───────── */
+.part-heading {
+  background:
+    radial-gradient(90% 120% at 100% 0%, color-mix(in srgb, var(--accent) 42%, transparent), transparent 58%),
+    radial-gradient(70% 90% at 0% 100%, color-mix(in srgb, var(--accent-2) 30%, transparent), transparent 62%),
+    var(--ink);
+  box-shadow: 0 24px 60px color-mix(in srgb, var(--accent) 18%, transparent);
+}
+.part-heading > :not(.floating-keywords) { position: relative; z-index: 1; }
+.part-heading > .part-number { position: absolute; z-index: 0; color: color-mix(in srgb, var(--accent) 8%, transparent); -webkit-text-stroke: 1.5px color-mix(in srgb, var(--accent) 70%, transparent); }
+.part-heading > svg { border-radius: 50%; box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 55%, transparent); }
+.part-heading .part-kicker { color: var(--accent); }
+/* keywords live on the left of the card; the title block on the right stays clean */
+.part-heading .floating-keywords { -webkit-mask-image: linear-gradient(90deg, #000 0 38%, #0000 62%); mask-image: linear-gradient(90deg, #000 0 38%, #0000 62%); }
+.part-heading .floating-keywords .is-signal { color: var(--accent); }
+.part-heading .floating-keywords .is-electric { color: color-mix(in srgb, var(--accent-2) 60%, #fff); }
+.part-heading .part-meta { display: flex; flex-wrap: wrap; gap: .45rem; }
+.part-heading .part-meta span { padding: .3rem .7rem; border: 1px solid #f6f4ef33; border-radius: 999px; background: #f6f4ef0f; }
+.part-heading .part-meta span:last-child { border-color: var(--accent); color: var(--paper); }
+
+/* ───────── Reading accents ───────── */
+.reading-progress span { background: linear-gradient(90deg, var(--accent-2), var(--accent)); }
+.heading-number { color: var(--accent-ink); }
+.book-content h2 .heading-anchor { position: relative; }
+.book-content h3 { padding-left: .8rem; border-left: 3px solid var(--accent); }
+.otp-indicator { background: var(--accent-ink); }
+.book-sidebar a[aria-current=page] .sidebar-part-icon { color: var(--accent); }
+.book-sidebar a[aria-current=page] { box-shadow: inset 3px 0 0 var(--accent); }
+.book-content a:not(.heading-anchor) { color: var(--accent-ink); }
+
+.callout-location { --callout-bg: var(--accent-soft); --callout-line: var(--accent); --callout-fg: var(--accent-ink); }
+.code-label > span:first-child { display: inline-flex; align-items: center; gap: .5rem; }
+.code-label > span:first-child::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 14px 0 0 var(--accent-2), 28px 0 0 var(--line); margin-right: 28px; }
+.book-content th { background: var(--accent-soft); }
+
+.chapter-nav a strong span { color: var(--accent-ink); }
+.chapter-nav a:hover strong span { color: var(--accent); }
+.chapter-nav a:hover { box-shadow: 0 16px 40px color-mix(in srgb, var(--accent) 22%, transparent); }
+
+@media (max-width: 760px) {
+  .part-heading .floating-keywords { -webkit-mask-image: linear-gradient(180deg, #000 0 30%, #0000 55%); mask-image: linear-gradient(180deg, #000 0 30%, #0000 55%); }
+  .reader-keywords { -webkit-mask-image: none; mask-image: none; }
+  .reader-keywords span { opacity: calc(var(--alpha) * .35); }
+}
+@media print { .reader-keywords, .part-heading .floating-keywords { display: none; } }

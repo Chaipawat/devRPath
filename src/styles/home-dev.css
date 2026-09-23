@@ -299,8 +299,10 @@
 .svg-cat-head { transform-box: fill-box; transform-origin: 50% 90%; animation: cat-tilt 3.2s ease-in-out infinite alternate; }
 @keyframes cat-tilt { from { transform: rotate(-4deg); } to { transform: rotate(4deg); } }
 .svg-antenna { animation: caret 1.4s ease-in-out infinite; }
-.svg-led:nth-child(odd) { animation: caret 1.1s steps(1) infinite; }
-@media (prefers-reduced-motion: reduce) { .svg-tail, .svg-cat-head, .svg-antenna, .svg-led { animation: none !important; } }
+@media (prefers-reduced-motion: reduce) { .svg-tail, .svg-cat-head, .svg-antenna { animation: none !important; } }
 .svg-blink { transform-box: fill-box; transform-origin: center; animation: svg-blink 4s infinite; }
 @keyframes svg-blink { 0%, 94%, 100% { transform: scaleY(1); } 97% { transform: scaleY(.1); } }
 @media (prefers-reduced-motion: reduce) { .svg-blink { animation: none !important; } }
+
+/* 8 learning paths: 4 × 2 on wide screens instead of a ragged 3-3-2. */
+@media (min-width: 1281px) { .path-grid { grid-template-columns: repeat(4, 1fr); } }

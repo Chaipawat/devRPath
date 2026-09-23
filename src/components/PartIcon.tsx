@@ -1,7 +1,7 @@
 import type { IconType } from "react-icons";
 import {
-  LuActivity, LuAtom, LuBlocks, LuBookOpenCheck, LuBraces, LuBrainCircuit, LuChartNoAxesCombined,
-  LuCodeXml, LuContainer, LuDatabase, LuGauge, LuGitBranch, LuGitCompareArrows, LuHexagon,
+  LuActivity, LuAtom, LuBlocks, LuBookOpenCheck, LuBot, LuBraces, LuBrainCircuit, LuChartColumn, LuChartNoAxesCombined,
+  LuChartPie, LuCodeXml, LuCoins, LuCompass, LuContainer, LuDatabase, LuDatabaseZap, LuFileSearch, LuMessageSquareText, LuShapes, LuSparkles, LuTable2, LuGauge, LuGitBranch, LuGitCompareArrows, LuHexagon,
   LuKeyRound, LuLayers, LuLeaf, LuNetwork, LuPanelTop, LuRocket, LuRoute, LuSearchCode,
   LuServerCog, LuShieldCheck, LuShipWheel, LuSmartphone, LuSquareCode, LuTerminal,
   LuTestTubeDiagonal, LuTimer, LuWaypoints, LuWorkflow, LuWrench,
@@ -17,6 +17,8 @@ const icons: Record<number, IconType> = {
   21: LuBrainCircuit, 22: LuGauge, 23: LuActivity, 24: LuWorkflow,
   25: LuBookOpenCheck, 26: LuPanelTop, 27: LuGitCompareArrows,
   28: LuWaypoints, 29: LuKeyRound, 30: LuTimer,
+  31: LuTable2, 32: LuDatabaseZap, 33: LuChartColumn, 34: LuShapes,
+  35: LuMessageSquareText, 36: LuFileSearch, 37: LuBot, 38: LuCoins, 39: LuCompass,
 };
 
 export function PartIcon({ number, className }: { number: number; className?: string }) {
@@ -24,4 +26,5 @@ export function PartIcon({ number, className }: { number: number; className?: st
   return <Icon className={className} aria-hidden="true" />;
 }
 
-export const categoryIcons = [LuNetwork, LuAtom, LuDatabase, LuContainer, LuChartNoAxesCombined, LuWrench];
+// Same order as the TOC sections (see sectionKinds in lib/content.ts).
+export const categoryIcons = [LuNetwork, LuAtom, LuDatabase, LuContainer, LuChartNoAxesCombined, LuChartPie, LuSparkles, LuWrench];

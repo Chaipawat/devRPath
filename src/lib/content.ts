@@ -8,7 +8,7 @@ const contentDirectory = path.join(process.cwd(), "content");
 
 export type Heading = { level: 2 | 3; text: string; id: string };
 
-export type SectionKind = "foundation" | "frontend" | "backend" | "infrastructure" | "senior" | "toolkit";
+export type SectionKind = "foundation" | "frontend" | "backend" | "infrastructure" | "senior" | "data" | "ai" | "toolkit";
 
 export type PartSummary = {
   number: number;
@@ -40,6 +40,8 @@ export const sectionLabels: Record<SectionKind, string> = {
   backend: "Backend",
   infrastructure: "Infrastructure",
   senior: "Senior",
+  data: "Data & Analytics",
+  ai: "Applied AI",
   toolkit: "Interview Toolkit",
 };
 
@@ -128,6 +130,8 @@ const sectionKinds: SectionKind[] = [
   "backend",
   "infrastructure",
   "senior",
+  "data",
+  "ai",
   "toolkit",
 ];
 
@@ -137,7 +141,9 @@ export function getSectionKind(number: number): SectionKind {
   if (number <= 11) return "backend";
   if (number <= 15) return "infrastructure";
   if (number <= 24) return "senior";
-  return "toolkit";
+  if (number <= 30) return "toolkit";
+  if (number <= 34) return "data";
+  return "ai";
 }
 
 export function getBookSections(): BookSection[] {
@@ -146,20 +152,22 @@ export function getBookSections(): BookSection[] {
   const blocks = tocBody.split(/^###\s+/m).slice(1);
   const allParts = new Map(getAllParts().map((part) => [part.number, part]));
 
-  return blocks.slice(0, 6).map((block, index) => {
+  return blocks.slice(0, sectionKinds.length).map((block, index) => {
     const [rawTitle, ...lines] = block.split("\n");
     const parts = lines
       .map((line) => line.match(/^\|\s*(\d+)\s*\|\s*([^|]+)\|[^|]*\]\(\.\/(part-[^)]+)\.md\)\s*\|\s*([^|]+)\|/))
-      .filter((match): match is RegExpMatchArray => Boolean(match))
+      // Skip TOC rows whose markdown file doesn't exist (yet), instead of rendering half-empty parts.
+      .filter((match): match is RegExpMatchArray => Boolean(match) && allParts.has(Number(match![1])))
       .map((match) => ({
-        ...(allParts.get(Number(match[1])) as PartSummary),
+        ...allParts.get(Number(match[1]))!,
         title: cleanInlineMarkdown(match[2]),
         description: cleanInlineMarkdown(match[4]),
         slug: match[3],
       }));
 
-    const title = index === 5 ? "ส่วนที่ 6 — เครื่องมือทบทวนและต่อยอด" : rawTitle.trim();
-    return { title, kind: sectionKinds[index], parts };
+    const kind = sectionKinds[index];
+    const title = kind === "toolkit" ? "ส่วนที่ 8 — เครื่องมือทบทวนและต่อยอด" : rawTitle.trim();
+    return { title, kind, parts };
   });
 }
 

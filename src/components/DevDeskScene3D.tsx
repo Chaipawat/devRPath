@@ -4,6 +4,8 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import { ContactShadows, Float, OrbitControls, RoundedBox } from "@react-three/drei";
 import { useCallback, useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import * as THREE from "three";
+import { LatteModel } from "@/components/latte3d/LatteModel";
+import type { TypingSignal } from "@/components/latte3d/types";
 
 const C = {
   ink: "#16140f", ink2: "#2a2722", paper: "#fbfaf7", paper2: "#e6e1d7", desk: "#e9e1d2",
@@ -11,7 +13,6 @@ const C = {
   pot: "#c8694a",
 };
 
-type Typing = { pulses: number; active: boolean };
 type Seg = [text: string, color: string];
 
 const K = "#ff8a5c", S = "#7fd1a8", F = "#8fa8ff", N = "#e8c060", P = "#f6f4ef", M = "#8f8a80";
@@ -244,7 +245,7 @@ const KEYS = ROWS * COLS;
 const keyColor = new THREE.Color(C.paper);
 const pressColor = new THREE.Color(C.signal);
 
-function Keyboard({ typing }: { typing: RefObject<Typing> }) {
+function Keyboard({ typing }: { typing: RefObject<TypingSignal> }) {
   const mesh = useRef<THREE.InstancedMesh>(null);
   const press = useRef(new Float32Array(KEYS));
   const seen = useRef(0);
@@ -281,339 +282,14 @@ function Keyboard({ typing }: { typing: RefObject<Typing> }) {
   );
 }
 
-const UP = new THREE.Vector3(0, 1, 0);
-const tmp = new THREE.Vector3();
-
-// Stretch a unit cylinder so it runs from a to b.
-function placeLimb(mesh: THREE.Mesh | null, a: THREE.Vector3, b: THREE.Vector3) {
-  if (!mesh) return;
-  tmp.copy(b).sub(a);
-  mesh.position.copy(a).add(b).multiplyScalar(0.5);
-  mesh.scale.set(1, tmp.length(), 1);
-  mesh.quaternion.setFromUnitVectors(UP, tmp.normalize());
-}
-
-// ───────── LATTE: cream-orange tabby with an AI backpack ─────────
-const FUR = { light: "#f6dcb4", base: "#efc38a", mid: "#e2a765", dark: "#cf8645", cream: "#fbeedd", pink: "#f2a3a8", nose: "#ee9a9f" };
-const PACK = { shell: "#a9b8dc", face: "#c9d3ec", dark: "#6f7fa8", glow: "#62f3ff" };
-
-function seeded(seed: number) {
-  return () => {
-    seed = (seed * 1664525 + 1013904223) % 4294967296;
-    return seed / 4294967296;
-  };
-}
-
-// Painted fur: soft tabby bands + thousands of tiny strands so the sheen reads as fluff.
-function furCanvas(kind: "body" | "head" | "tail") {
-  const canvas = document.createElement("canvas");
-  canvas.width = 512;
-  canvas.height = 256;
-  const ctx = canvas.getContext("2d")!;
-  const { width: w, height: h } = canvas;
-  const rand = seeded(kind === "body" ? 3 : kind === "head" ? 17 : 29);
-  ctx.fillStyle = FUR.base;
-  ctx.fillRect(0, 0, w, h);
-
-  // Lighter chest / muzzle facing the desk (u ≈ .75 on a three.js sphere).
-  if (kind !== "tail") {
-    const chest = ctx.createRadialGradient(w * 0.75, h * (kind === "head" ? 0.72 : 0.62), 10, w * 0.75, h * 0.6, w * 0.22);
-    chest.addColorStop(0, FUR.cream);
-    chest.addColorStop(1, "#fbeedd00");
-    ctx.fillStyle = chest;
-    ctx.fillRect(0, 0, w, h);
-  }
-
-  ctx.lineCap = "round";
-  if (kind === "tail") {
-    for (let x = 30; x < w; x += 58) {
-      ctx.strokeStyle = FUR.dark + "80";
-      ctx.lineWidth = 24;
-      ctx.filter = "blur(4px)";
-      ctx.beginPath();
-      ctx.moveTo(x, 0);
-      ctx.lineTo(x + 8, h);
-      ctx.stroke();
-    }
-    ctx.filter = "none";
-  } else {
-    const bands = kind === "head" ? 5 : 8;
-    for (let i = 0; i < bands; i++) {
-      const y = (kind === "head" ? 18 : 40) + i * (kind === "head" ? 18 : 22);
-      ctx.strokeStyle = (i % 2 ? FUR.mid : FUR.dark) + "66";
-      ctx.lineWidth = 9 + rand() * 7;
-      ctx.filter = "blur(3px)";
-      // Stripes fade out over the chest so the front stays creamy.
-      ctx.beginPath();
-      for (let x = 0; x <= w; x += 8) {
-        const u = x / w;
-        const chestFade = Math.abs(u - 0.75) < 0.12;
-        const yy = y + Math.sin(u * Math.PI * 10 + i) * 6;
-        if (chestFade) ctx.moveTo(x, yy);
-        else ctx.lineTo(x, yy);
-      }
-      ctx.stroke();
-      ctx.filter = "none";
-    }
-    if (kind === "head") {
-      // the classic tabby "M" on the forehead
-      ctx.strokeStyle = FUR.dark + "a6";
-      ctx.lineWidth = 6;
-      [-26, -10, 10, 26].forEach((dx) => {
-        ctx.beginPath();
-        ctx.moveTo(w * 0.75 + dx, 60);
-        ctx.lineTo(w * 0.75 + dx * 0.6, 96);
-        ctx.stroke();
-      });
-    }
-  }
-
-  for (let i = 0; i < 9000; i++) {
-    const x = rand() * w;
-    const y = rand() * h;
-    const light = rand() > 0.5;
-    ctx.strokeStyle = light ? "#fff6e633" : "#b8733a26";
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(x, y);
-    ctx.lineTo(x + (rand() - 0.5) * 3, y + 3 + rand() * 4);
-    ctx.stroke();
-  }
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.colorSpace = THREE.SRGBColorSpace;
-  texture.anisotropy = 8;
-  return texture;
-}
-
-function useFur(kind: "body" | "head" | "tail") {
-  const texture = useMemo(() => furCanvas(kind), [kind]);
-  useEffect(() => () => texture.dispose(), [texture]);
-  return texture;
-}
-
-function FurMaterial({ map, color = "#ffffff" }: { map?: THREE.Texture; color?: string }) {
-  return <meshPhysicalMaterial map={map} color={color} roughness={0.92} sheen={1} sheenRoughness={0.55} sheenColor="#fff1dc" />;
-}
-
-function Foreleg({ side, typing, fur }: { side: 1 | -1; typing: RefObject<Typing>; fur: THREE.Texture }) {
-  const upper = useRef<THREE.Mesh>(null);
-  const fore = useRef<THREE.Mesh>(null);
-  const elbowMesh = useRef<THREE.Mesh>(null);
-  const paw = useRef<THREE.Mesh>(null);
-  const points = useMemo(() => ({
-    shoulder: new THREE.Vector3(-0.12 + side * 0.18, 0.08, 0.86),
-    elbow: new THREE.Vector3(-0.12 + side * 0.21, 0.01, 0.64),
-    rest: new THREE.Vector3(-0.12 + side * 0.15, 0.085, 0.42),
-    hand: new THREE.Vector3(),
-  }), [side]);
-
-  useFrame(({ clock }) => {
-    const t = clock.elapsedTime;
-    const bob = typing.current.active ? Math.max(0, Math.sin(t * 15 + (side > 0 ? 0 : 1.7))) * 0.024 : 0;
-    const { shoulder, elbow, rest } = points;
-    points.hand.copy(rest).add(tmp.set(Math.sin(t * 2.6 + side) * 0.018, bob, 0));
-    placeLimb(upper.current, shoulder, elbow);
-    placeLimb(fore.current, elbow, points.hand);
-    elbowMesh.current?.position.copy(elbow);
-    paw.current?.position.copy(points.hand);
-  });
-
-  return (
-    <>
-      <mesh ref={upper}><cylinderGeometry args={[0.075, 0.068, 1, 16]} /><FurMaterial map={fur} /></mesh>
-      <mesh ref={elbowMesh}><sphereGeometry args={[0.07, 16, 16]} /><FurMaterial map={fur} /></mesh>
-      <mesh ref={fore}><cylinderGeometry args={[0.064, 0.06, 1, 16]} /><FurMaterial map={fur} /></mesh>
-      <mesh ref={paw} scale={[1.15, 0.75, 1.3]}><sphereGeometry args={[0.066, 20, 20]} /><FurMaterial color={FUR.cream} /></mesh>
-    </>
-  );
-}
-
-// Head is a sphere (r .3) scaled [1.14, .94, 1]; eyes must sit exactly on that ellipsoid.
-const HEAD_AXES = new THREE.Vector3(0.3 * 1.14, 0.3 * 0.94, 0.3);
-const EYE_R = 0.058;
-const GAZE = new THREE.Vector3(0, 0.02, -1.4);
-const ORIGIN = new THREE.Vector3();
-
-// Rotation whose +z points along dir while +y stays as close to world-up as possible (no random roll).
-function facing(dir: THREE.Vector3) {
-  const m = new THREE.Matrix4().lookAt(dir, ORIGIN, UP);
-  return new THREE.Quaternion().setFromRotationMatrix(m);
-}
-
-// Glossy eyeball half-sunk into the fur, pupil upright and aimed at a shared point so both eyes converge.
-function Eye({ side }: { side: 1 | -1 }) {
-  const parts = useMemo(() => {
-    const dir = new THREE.Vector3(side * 0.4, 0.12, -0.9).normalize();
-    const k = 1 / Math.sqrt((dir.x / HEAD_AXES.x) ** 2 + (dir.y / HEAD_AXES.y) ** 2 + (dir.z / HEAD_AXES.z) ** 2);
-    const surface = dir.clone().multiplyScalar(k);
-    const normal = new THREE.Vector3(surface.x / HEAD_AXES.x ** 2, surface.y / HEAD_AXES.y ** 2, surface.z / HEAD_AXES.z ** 2).normalize();
-    const ball = surface.clone().addScaledVector(normal, -EYE_R * 0.4);
-    const gaze = GAZE.clone().sub(ball).normalize();
-    const look = facing(gaze);
-    const onBall = (x: number, y: number) => ball.clone().add(new THREE.Vector3(x, y, Math.sqrt(1 - x * x - y * y)).multiplyScalar(EYE_R * 1.01).applyQuaternion(look));
-    return {
-      ball,
-      pupil: ball.clone().addScaledVector(gaze, EYE_R * 0.95),
-      look,
-      glint: onBall(-0.34, 0.4),
-      glintSmall: onBall(0.3, -0.3),
-      rim: surface.clone().addScaledVector(normal, 0.002),
-      rimQuat: facing(normal),
-    };
-  }, [side]);
-
-  return (
-    <>
-      <mesh position={parts.ball}>
-        <sphereGeometry args={[EYE_R, 32, 32]} />
-        <meshPhysicalMaterial color="#c8c35e" roughness={0.15} clearcoat={1} clearcoatRoughness={0.05} emissive="#5c6a1c" emissiveIntensity={0.18} />
-      </mesh>
-      <mesh position={parts.pupil} quaternion={parts.look} scale={[0.42, 0.86, 0.22]}>
-        <sphereGeometry args={[EYE_R * 0.62, 24, 24]} />
-        <meshStandardMaterial color="#14120d" roughness={0.1} />
-      </mesh>
-      <mesh position={parts.glint}><sphereGeometry args={[EYE_R * 0.19, 12, 12]} /><meshBasicMaterial color="#ffffff" /></mesh>
-      <mesh position={parts.glintSmall}><sphereGeometry args={[EYE_R * 0.085, 8, 8]} /><meshBasicMaterial color="#ffffff" /></mesh>
-      {/* dark rim where the lid meets the eye */}
-      <mesh position={parts.rim} quaternion={parts.rimQuat}><torusGeometry args={[EYE_R * 0.93, 0.0075, 10, 40]} /><meshStandardMaterial color="#6b4424" roughness={0.6} /></mesh>
-    </>
-  );
-}
-
-function MochiHead() {
-  const head = useRef<THREE.Group>(null);
-  const eyes = useRef<THREE.Group>(null);
-  const ears = useRef<(THREE.Group | null)[]>([]);
-  const fur = useFur("head");
-
-  useFrame(({ clock }, delta) => {
-    if (!head.current || !eyes.current) return;
-    const t = clock.elapsedTime;
-    // Every 10s LATTE turns round to check on you, then goes back to "work".
-    const phase = t % 10;
-    const lookBack = true || (phase > 6.2 && phase < 8.8);
-    head.current.rotation.y = THREE.MathUtils.damp(head.current.rotation.y, lookBack ? -2.1 : Math.sin(t * 0.6) * 0.16, 4, delta);
-    head.current.rotation.z = THREE.MathUtils.damp(head.current.rotation.z, lookBack ? 0.22 : Math.sin(t * 1.2) * 0.05, 4, delta);
-    head.current.rotation.x = -0.12 + Math.sin(t * 3.8) * 0.018;
-    const facingYou = Math.abs(head.current.rotation.y) > 1.5;
-    // Slow blink; a content half-squint while looking at you.
-    const blink = t % 3.6 < 0.14 ? 0.08 : 1;
-    eyes.current.scale.y = THREE.MathUtils.damp(eyes.current.scale.y, blink, 18, delta);
-    ears.current.forEach((ear, i) => {
-      if (ear) ear.rotation.z = (i ? -1 : 1) * 0.32 + (facingYou ? Math.sin(t * 18 + i) * 0.12 : 0);
-    });
-  });
-
-  return (
-    <group ref={head} position={[-0.12, 0.46, 0.99]} scale={1.16}>
-      <mesh scale={[1.14, 0.94, 1]}><sphereGeometry args={[0.3, 48, 48]} /><FurMaterial map={fur} /></mesh>
-      {/* chubby cheeks + muzzle */}
-      {[-1, 1].map((s) => (
-        <mesh key={s} position={[s * 0.07, -0.085, -0.235]} scale={[1, 0.8, 0.8]}><sphereGeometry args={[0.085, 24, 24]} /><FurMaterial color={FUR.cream} /></mesh>
-      ))}
-      <mesh position={[0, -0.13, -0.225]} scale={[1, 0.7, 0.8]}><sphereGeometry args={[0.055, 20, 20]} /><FurMaterial color={FUR.cream} /></mesh>
-      <mesh position={[0, -0.045, -0.3]} scale={[1.3, 0.85, 0.8]}><sphereGeometry args={[0.024, 16, 16]} /><meshStandardMaterial color={FUR.nose} roughness={0.35} /></mesh>
-      {/* whiskers */}
-      {[-1, 1].flatMap((s) => [-0.02, 0, 0.02].map((dy, i) => (
-        <mesh key={`${s}${i}`} position={[s * 0.2, -0.07 + dy, -0.22]} rotation={[0, s * 0.35, Math.PI / 2 + s * (dy * 6)]}>
-          <cylinderGeometry args={[0.0022, 0.001, 0.2, 4]} />
-          <meshBasicMaterial color="#fffaf2" />
-        </mesh>
-      )))}
-      <group ref={eyes}>
-        <Eye side={-1} />
-        <Eye side={1} />
-      </group>
-      {/* ears: rounded shorthair ears with pink inside */}
-      {[-1, 1].map((s, i) => (
-        <group key={s} ref={(el) => { ears.current[i] = el; }} position={[s * 0.19, 0.22, 0.01]} rotation={[-0.15, 0, s * -0.32]}>
-          <mesh scale={[1, 1, 0.55]}><coneGeometry args={[0.125, 0.21, 24]} /><FurMaterial color={FUR.base} /></mesh>
-          <mesh position={[0, -0.015, -0.04]} scale={[0.7, 0.8, 0.3]}><coneGeometry args={[0.125, 0.21, 24]} /><meshStandardMaterial color={FUR.pink} roughness={0.8} /></mesh>
-        </group>
-      ))}
-    </group>
-  );
-}
-
-function packLabel() {
-  const canvas = document.createElement("canvas");
-  canvas.width = 256;
-  canvas.height = 320;
-  const ctx = canvas.getContext("2d")!;
-  ctx.fillStyle = PACK.face;
-  ctx.beginPath();
-  ctx.roundRect(0, 0, 256, 320, 70);
-  ctx.fill();
-  ctx.fillStyle = PACK.dark;
-  // cat-head logo
-  ctx.beginPath();
-  ctx.moveTo(88, 96); ctx.lineTo(96, 52); ctx.lineTo(118, 76); ctx.lineTo(138, 76); ctx.lineTo(160, 52); ctx.lineTo(168, 96);
-  ctx.quadraticCurveTo(170, 140, 128, 142); ctx.quadraticCurveTo(86, 140, 88, 96);
-  ctx.fill();
-  ctx.font = "700 92px system-ui, sans-serif";
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillText("AI", 128, 228);
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.colorSpace = THREE.SRGBColorSpace;
-  return texture;
-}
-
-function AiBackpack() {
-  const label = useMemo(() => packLabel(), []);
-  const glow = useRef<THREE.MeshStandardMaterial>(null);
-  useEffect(() => () => label.dispose(), [label]);
-  useFrame(({ clock }) => {
-    if (glow.current) glow.current.emissiveIntensity = 1.6 + Math.sin(clock.elapsedTime * 2.2) * 0.7;
-  });
-  return (
-    <group position={[-0.12, -0.16, 1.5]} rotation={[-0.12, 0, 0]} scale={1.12}>
-      <RoundedBox args={[0.3, 0.36, 0.15]} radius={0.07} smoothness={5}><meshPhysicalMaterial color={PACK.shell} roughness={0.35} clearcoat={0.6} /></RoundedBox>
-      <mesh position={[0, 0, 0.077]}><planeGeometry args={[0.22, 0.28]} /><meshStandardMaterial map={label} transparent roughness={0.4} /></mesh>
-      {[-1, 1].map((s) => (
-        <mesh key={s} position={[s * 0.152, 0, 0.02]}><boxGeometry args={[0.012, 0.22, 0.03]} /><meshStandardMaterial ref={s > 0 ? glow : undefined} color={PACK.glow} emissive={PACK.glow} emissiveIntensity={1.8} /></mesh>
-      ))}
-      {/* straps over the shoulders */}
-      {[-1, 1].map((s) => (
-        <mesh key={`strap${s}`} position={[s * 0.1, 0.2, -0.08]} rotation={[0.9, 0, 0]}><boxGeometry args={[0.04, 0.22, 0.015]} /><meshStandardMaterial color={PACK.dark} /></mesh>
-      ))}
-    </group>
-  );
-}
-
-function StripedTail() {
-  const tail = useRef<THREE.Group>(null);
-  const fur = useFur("tail");
-  const { geometry, tip } = useMemo(() => {
-    const curve = new THREE.CatmullRomCurve3([
-      new THREE.Vector3(0, 0, 0), new THREE.Vector3(0.2, -0.04, 0.12), new THREE.Vector3(0.36, 0.12, 0.18),
-      new THREE.Vector3(0.42, 0.38, 0.12), new THREE.Vector3(0.34, 0.54, 0.04),
-    ]);
-    return { geometry: new THREE.TubeGeometry(curve, 64, 0.058, 16), tip: curve.getPoint(1) };
-  }, []);
-  useEffect(() => () => geometry.dispose(), [geometry]);
-  useFrame(({ clock }) => {
-    if (!tail.current) return;
-    const t = clock.elapsedTime;
-    tail.current.rotation.y = Math.sin(t * 1.6) * 0.28;
-    tail.current.rotation.z = Math.sin(t * 1.6 + 1) * 0.08;
-  });
-  return (
-    <group ref={tail} position={[0.1, -0.6, 1.36]}>
-      <mesh geometry={geometry}><FurMaterial map={fur} /></mesh>
-      <mesh position={tip}><sphereGeometry args={[0.062, 20, 20]} /><FurMaterial color={FUR.mid} /></mesh>
-    </group>
-  );
-}
-
-function Mochi({ typing }: { typing: RefObject<Typing> }) {
-  const bodyFur = useFur("body");
+function DeskChair() {
   return (
     <group>
-      {/* chair + cushion */}
       <RoundedBox args={[0.78, 0.09, 0.72]} radius={0.035} position={[-0.12, -0.82, 1.24]}><meshStandardMaterial color={C.ink} /></RoundedBox>
       <RoundedBox args={[0.72, 0.62, 0.08]} radius={0.035} position={[-0.12, -0.46, 1.64]} rotation={[0.1, 0, 0]}><meshStandardMaterial color={C.ink} /></RoundedBox>
       <RoundedBox args={[0.66, 0.09, 0.6]} radius={0.045} position={[-0.12, -0.735, 1.22]}><meshStandardMaterial color="#e8dcc8" roughness={0.9} /></RoundedBox>
+      {/* round cushion that lifts Latte to keyboard height */}
+      <mesh position={[-0.12, -0.625, 1.12]}><cylinderGeometry args={[0.3, 0.32, 0.13, 32]} /><meshStandardMaterial color="#f3b58a" roughness={0.9} /></mesh>
       <mesh position={[-0.12, -1.07, 1.24]}><cylinderGeometry args={[0.04, 0.04, 0.42, 12]} /><meshStandardMaterial color={C.ink2} /></mesh>
       {[0, 1, 2, 3, 4].map((i) => {
         const a = (i / 5) * Math.PI * 2;
@@ -624,29 +300,14 @@ function Mochi({ typing }: { typing: RefObject<Typing> }) {
           </group>
         );
       })}
-
-      {/* round, loaf-ish body + haunches */}
-      <mesh position={[-0.12, -0.3, 1.1]} rotation={[-0.14, 0, 0]} scale={[0.4, 0.47, 0.4]}>
-        <sphereGeometry args={[1, 48, 48]} />
-        <FurMaterial map={bodyFur} />
-      </mesh>
-      {[-1, 1].map((s) => (
-        <mesh key={s} position={[-0.12 + s * 0.25, -0.6, 1.12]} scale={[0.18, 0.15, 0.27]}><sphereGeometry args={[1, 24, 24]} /><FurMaterial map={bodyFur} /></mesh>
-      ))}
-      {/* collar + bell */}
-      <mesh position={[-0.12, 0.16, 1.02]} rotation={[Math.PI / 2 - 0.25, 0, 0]}><torusGeometry args={[0.22, 0.03, 12, 40]} /><meshStandardMaterial color="#e0782f" roughness={0.55} /></mesh>
-      <group position={[-0.12, 0.09, 0.8]}>
-        <mesh><sphereGeometry args={[0.045, 24, 24]} /><meshStandardMaterial color="#e3b33c" metalness={0.85} roughness={0.22} /></mesh>
-        <mesh position={[0, -0.022, -0.036]}><boxGeometry args={[0.006, 0.03, 0.01]} /><meshStandardMaterial color="#3a2a10" /></mesh>
-      </group>
-      <Foreleg side={-1} typing={typing} fur={bodyFur} />
-      <Foreleg side={1} typing={typing} fur={bodyFur} />
-      <MochiHead />
-      <AiBackpack />
-      <StripedTail />
     </group>
   );
 }
+
+// Every 10s Latte turns round to check on you (head yaw is in her own frame; she faces the monitor).
+const GLANCE = { yaw: -2.1, roll: 0.22, period: 10, at: 6.2, hold: 2.6 };
+// Desk Latte: chubby enough to fill the chair, bigger head and eyes for the hero shot.
+const DESK_LATTE = { bodyWidth: 1.25, belly: 1.18, headScale: 1.12, eyeScale: 1.0, legThickness: 1.15 };
 
 function DeskProps() {
   return (
@@ -758,7 +419,7 @@ function FloatingChips() {
 
 function Scene() {
   const group = useRef<THREE.Group>(null);
-  const typing = useRef<Typing>({ pulses: 0, active: true });
+  const typing = useRef<TypingSignal>({ pulses: 0, active: true });
   const onType = useCallback((active: boolean, keystroke: boolean) => {
     typing.current.active = active;
     if (keystroke) typing.current.pulses += 1;
@@ -775,7 +436,8 @@ function Scene() {
       <Monitor onType={onType} />
       <Laptop />
       <Keyboard typing={typing} />
-      <Mochi typing={typing} />
+      <DeskChair />
+      <LatteModel pose="typing" expression="curious" tuning={DESK_LATTE} typing={typing} glance={GLANCE} position={[-0.12, -0.56, 1.0]} rotation={[0, Math.PI, 0]} scale={1.15} />
       <FloatingChips />
       <ContactShadows position={[0, -1.33, 0.3]} scale={7} blur={2.6} far={3} opacity={0.32} />
     </group>
@@ -794,7 +456,7 @@ export default function DevDeskScene3D() {
   }, []);
 
   return (
-    <div ref={ref} className="knowledge-scene dev-scene" role="img" aria-label="ภาพสามมิติของ LATTE แมวส้มสะพายเป้ AI กำลังเขียนโค้ดหน้าจอคอมพิวเตอร์">
+    <div ref={ref} className="knowledge-scene dev-scene" role="img" aria-label="ภาพสามมิติของ Latte แมวส้มครีม กำลังเขียนโค้ดหน้าจอคอมพิวเตอร์">
       <Canvas dpr={[1, 1.75]} frameloop={inView ? "always" : "never"} camera={{ position: [3.3, 2.0, 4.5], fov: 42 }}>
         <ambientLight intensity={1.35} />
         <directionalLight position={[4, 7, 5]} intensity={2.1} />

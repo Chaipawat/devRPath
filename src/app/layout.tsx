@@ -5,6 +5,7 @@ import "./globals.css";
 import "../styles/cinematic.css";
 import "../styles/polish.css";
 import "../styles/home-dev.css";
+import "../styles/reader-dev.css";
 import { siteDescription, siteName, siteUrl } from "@/lib/site";
 
 const sans = IBM_Plex_Sans_Thai({

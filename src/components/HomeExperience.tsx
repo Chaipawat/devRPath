@@ -25,6 +25,8 @@ const pathArt = [
   ["#12a37f", ["REST", "SELECT", "JWT"]],
   ["#8a7dff", ["docker", "k8s", "CI/CD"]],
   ["#e0a100", ["SOLID", "test()", "git"]],
+  ["#0fa3b1", ["GROUP BY", "OVER()", "fact"]],
+  ["#c026d3", ["prompt", "RAG", "agent"]],
   ["#16140f", ["Q&A", "cheat", "30:00"]],
 ] as const;
 const flow = [
@@ -63,7 +65,7 @@ export function HomeExperience({ sections }: { sections: BookSection[] }) {
           <ul aria-label="สิ่งที่จะได้เรียน">{stack.map((item) => <li key={item}>{item}</li>)}</ul>
         </div>
       </div>
-      <div className="hero-proof"><span><strong>31</strong> PARTS</span><span><strong>346</strong> KEYWORDS</span><span><strong>80</strong> KNOWLEDGE CHECKS</span></div>
+      <div className="hero-proof"><span><strong>{allParts.length}</strong> PARTS</span><span><strong>346</strong> KEYWORDS</span><span><strong>80</strong> KNOWLEDGE CHECKS</span></div>
     </section>
 
     <section id="levels" className="levels-section">
@@ -83,7 +85,7 @@ export function HomeExperience({ sections }: { sections: BookSection[] }) {
 
     <section id="paths" className="paths-section">
       <FloatingKeywords count={28} seed={71} />
-      <Reveal className="levels-head trace-head paths-head"><div><p className="kicker">CHOOSE YOUR PATH / {sections.length} PATHS · {allParts.length} PARTS</p><h2>เรียนเป็นเส้นทาง<br/><em>เห็นเป็นภาพเดียว</em></h2></div><div className="paths-aside"><p>หกกลุ่มความรู้ที่เรียงจากรากฐานไปสู่การดูแลระบบจริง เลือกเริ่มจากเส้นทางที่ใช่ หรือไล่ตามลำดับทีละขั้น</p><ol className="path-rail" aria-label="ลำดับเส้นทาง">{sections.map((section, index) => <li key={section.kind} style={{ "--c": pathArt[index]?.[0] ?? "#ff5a1f" } as CSSProperties}><a href={`#path-${section.kind}`}><i aria-hidden="true" />{sectionLabels[section.kind]}</a></li>)}</ol></div></Reveal>
+      <Reveal className="levels-head trace-head paths-head"><div><p className="kicker">CHOOSE YOUR PATH / {sections.length} PATHS · {allParts.length} PARTS</p><h2>เรียนเป็นเส้นทาง<br/><em>เห็นเป็นภาพเดียว</em></h2></div><div className="paths-aside"><p>{sections.length} กลุ่มความรู้ที่เรียงจากรากฐานไปสู่การดูแลระบบจริง ต่อยอดถึง Data และ AI เลือกเริ่มจากเส้นทางที่ใช่ หรือไล่ตามลำดับทีละขั้น</p><ol className="path-rail" aria-label="ลำดับเส้นทาง">{sections.map((section, index) => <li key={section.kind} style={{ "--c": pathArt[index]?.[0] ?? "#ff5a1f" } as CSSProperties}><a href={`#path-${section.kind}`}><i aria-hidden="true" />{sectionLabels[section.kind]}</a></li>)}</ol></div></Reveal>
       <div className="path-grid">{sections.map((section, index) => { const Icon = categoryIcons[index]; return <Reveal key={section.kind} delay={index * .06}><article id={`path-${section.kind}`} className={`path-card path-${index + 1}`} style={{ "--c": pathArt[index]?.[0] ?? "#ff5a1f" } as CSSProperties}><div className="path-visual" aria-hidden="true"><i className="path-tile"><Icon/></i>{pathArt[index]?.[1].map((tag, j) => <b key={tag} className={`path-tag tag-${j + 1}`}>{tag}</b>)}<code>$ cd paths/{section.kind}</code><strong>{String(index + 1).padStart(2, "0")}</strong></div><div className="path-meta"><span>{section.parts.length} PARTS</span><b>PATH / {String(index + 1).padStart(2, "0")}</b></div><h3>{section.title.replace(/^ส่วนที่\s*\d+\s*[—–-]\s*/, "")}</h3><ol>{section.parts.map((part) => <li key={part.slug}><Link href={`/part/${part.slug}`}><PartIcon number={part.number}/><span>{part.title}</span><i>↗</i></Link></li>)}</ol></article></Reveal>; })}</div></section>
 
     <section id="highlights" className="bento-section"><Reveal><p className="kicker">FIELD NOTES / TOOLS</p><h2>หยิบใช้ได้ทันที</h2></Reveal><div className="bento-grid">{highlights.map(([part, title, desc], i) => <Reveal key={title} delay={i * .05} className={`bento-card bento-${i + 1}`}><Link href={hrefFor(part)}><PartIcon number={part}/><span>PART {part}</span><h3>{title}</h3><p>{desc}</p><i>EXPLORE ↗</i></Link></Reveal>)}</div></section>

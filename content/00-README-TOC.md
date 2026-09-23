@@ -132,7 +132,26 @@
 | 23 | Observability | [part-23](./part-23-observability.md) | Logs, Metrics, Tracing, Monitoring vs Observability, Latency, Throughput, Error Rate, CPU/Memory, Request ID/Trace ID, APM, Health Check, Incident, Postmortem |
 | 24 | System Design Fundamentals | [part-24](./part-24-system-design.md) | จาก User → LB → Backend → Cache → DB แล้วค่อยเพิ่ม CDN/API Gateway/Queue/Worker/Object Storage/WebSocket + 12 ขั้นตอนการคิด System Design |
 
-### ส่วนที่ 6 — โหมดสัมภาษณ์ (อ่านก่อนเข้าห้อง)
+### ส่วนที่ 6 — Data & Analytics
+
+| PART | ชื่อ | ไฟล์ | เนื้อหาหลัก |
+|---|---|---|---|
+| 31 | SQL in Practice | [part-31](./part-31-sql-in-practice.md) | Logical Query Order, Aggregate, GROUP BY/HAVING, Grain, NULL, JOIN & Fan-out, Semi/Anti Join, CTE, Window Function, Dedup, Top-N per Group, Gaps & Islands, Data Quality Check, EXPLAIN |
+| 32 | NoSQL | [part-32](./part-32-nosql.md) | Document, Key-value, Wide-column, Graph, Search Engine, Query-first Design, Embed vs Reference, Partition Key, Hot Partition, Consistency, CAP/PACELC, Polyglot Persistence |
+| 33 | Data Analysis | [part-33](./part-33-data-analysis.md) | Metric Definition, North Star/Input/Guardrail, Event Tracking, Funnel, Cohort & Retention, Segmentation, Correlation vs Causation, Simpson's Paradox, A/B Testing, Decision Memo |
+| 34 | Data Modeling | [part-34](./part-34-data-modeling.md) | OLTP vs OLAP, Grain, Fact/Dimension, Star vs Snowflake, SCD, ETL vs ELT, Warehouse/Lake/Lakehouse, Layered Model, Data Contract, Lineage, Data Quality Test |
+
+### ส่วนที่ 7 — Applied AI
+
+| PART | ชื่อ | ไฟล์ | เนื้อหาหลัก |
+|---|---|---|---|
+| 35 | LLM Foundations | [part-35](./part-35-llm-foundations.md) | Token, Context Window, Temperature, System/User Message, Prompt as Spec, Few-shot, Structured Output, Tool Calling, Hallucination, Eval, Prompt Injection |
+| 36 | RAG | [part-36](./part-36-rag.md) | Indexing/Query Pipeline, Chunking, Embedding, Vector DB, Hybrid Search, Rerank, Permission-aware Retrieval, Grounding & Citation, RAG Eval, RAG vs Fine-tuning |
+| 37 | AI Agents | [part-37](./part-37-ai-agents.md) | Agent Loop, Workflow vs Agent, Tool Design, Agent Patterns, Memory, Multi-agent, MCP, Guardrails, Human-in-the-loop, Indirect Prompt Injection, Agent Eval |
+| 38 | Token & AI Ops | [part-38](./part-38-ai-ops.md) | Token Billing, Cost Estimation, Latency/TTFT, Streaming, Prompt Caching, Model Routing, Fallback, Rate Limit, Budget Guard, LLM Observability, Prompt Versioning, PII |
+| 39 | Model Guide | [part-39](./part-39-model-guide.md) | Model Tiers, Selection Criteria, Reasoning Mode, OpenAI/Claude/Gemini/Open-weight, Model Bake-off, Provider Abstraction, Migration Checklist, Self-hosting |
+
+### ส่วนที่ 8 — โหมดสัมภาษณ์ (อ่านก่อนเข้าห้อง)
 
 | PART | ชื่อ | ไฟล์ | เนื้อหาหลัก |
 |---|---|---|---|
@@ -149,13 +168,15 @@
 
 | สถานการณ์ | อ่านอะไร |
 |---|---|
-| มีเวลา 2 สัปดาห์ | PART 0 → 30 ตามลำดับ วันละ 2 PART |
+| มีเวลา 2 สัปดาห์ | PART 0 → 30 ตามลำดับ วันละ 2 PART (PART 31–39 อ่านต่อเมื่อพร้อม) |
 | มีเวลา 3 วัน | PART 0, 1, 2, 3, 4, 5, 6, 7, 8, 20, 27, 29 |
 | มีเวลา 1 วัน | PART 0, 20, 25, 27, 28, 29 |
 | เหลือ 30 นาที | PART 30 อย่างเดียว |
 | สัมภาษณ์ Frontend | PART 0–4, 12, 18, 20, 22, 25, 27 |
 | สัมภาษณ์ Full-stack | PART 0–8, 13–17, 20, 24, 25, 27 |
 | สัมภาษณ์กับ HR (ไม่ใช่ dev) | PART 26 + PART 29 |
+| สาย Data / Analytics | PART 8, 31–34, 22 |
+| ทำ feature AI / LLM | PART 35–39, 23 |
 
 ---
 
