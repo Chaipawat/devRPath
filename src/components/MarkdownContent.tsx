@@ -35,7 +35,7 @@ export function MarkdownContent({ children }: { children: string }) {
         ),
         pre: ({ children: preChildren }: { children?: ReactNode }) => (
           <div className="code-scroll" role="region" aria-label="โค้ดหรือแผนภาพ เลื่อนแนวนอนได้" tabIndex={0}>
-            <pre>{preChildren}</pre>
+            <div className="code-label"><span>DIAGRAM / CODE</span><span>DEVPATH</span></div><pre>{preChildren}</pre>
           </div>
         ),
       }}

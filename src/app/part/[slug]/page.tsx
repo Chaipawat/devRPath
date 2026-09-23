@@ -35,7 +35,8 @@ export default async function PartPage({ params }: PageProps<"/part/[slug]">) {
       <article className="book-content">
         <header className="part-heading">
           <SectionIcon kind={getSectionKind(part.number)} />
-          <div><p>PART {part.number.toString().padStart(2, "0")}</p><h1>{part.title}</h1></div>
+          <div className="part-number" aria-hidden="true">{part.number.toString().padStart(2, "0")}</div>
+          <div><p>DEVPATH / PART {part.number.toString().padStart(2, "0")}</p><h1>{part.title}</h1></div>
         </header>
         <MarkdownContent>{part.content}</MarkdownContent>
       </article>

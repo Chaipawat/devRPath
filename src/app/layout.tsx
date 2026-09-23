@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { IBM_Plex_Sans_Thai, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
-import { Search } from "@/components/Search";
-import { getSearchIndex } from "@/lib/content";
+import "../styles/cinematic.css";
 
 const sans = IBM_Plex_Sans_Thai({
   variable: "--font-sans",
@@ -19,8 +18,11 @@ const mono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Software Developer Interview Read Book",
-  description: "หนังสือทบทวนความรู้สำหรับสัมภาษณ์ Software Developer",
+  title: {
+    default: "DevPath — Developer Knowledge Base",
+    template: "%s | DevPath",
+  },
+  description: "คลังความรู้และเส้นทางการเรียนรู้สำหรับ Software Developer ตั้งแต่พื้นฐานจนถึงระบบ Production",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -31,8 +33,16 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full flex flex-col">
         <a className="skip-link" href="#main-content">ข้ามไปเนื้อหา</a>
-        <Search items={getSearchIndex()} />
         {children}
+        <a
+          className="creator-mark"
+          href="https://github.com/Chaipawat"
+          target="_blank"
+          rel="noreferrer"
+          aria-label="สร้างโดย Chaipawat — เปิด GitHub ในแท็บใหม่"
+        >
+          <span>BUILT BY</span> CHAIPAWAT <i aria-hidden="true">↗</i>
+        </a>
       </body>
     </html>
   );

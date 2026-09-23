@@ -24,7 +24,7 @@ export type Part = PartSummary & {
 
 export type BookSection = {
   title: string;
-  kind: "foundation" | "frontend" | "backend" | "infrastructure" | "senior" | "interview";
+  kind: "foundation" | "frontend" | "backend" | "infrastructure" | "senior" | "toolkit";
   parts: PartSummary[];
 };
 
@@ -80,7 +80,7 @@ const sectionKinds: BookSection["kind"][] = [
   "backend",
   "infrastructure",
   "senior",
-  "interview",
+  "toolkit",
 ];
 
 export function getSectionKind(number: number): BookSection["kind"] {
@@ -89,7 +89,7 @@ export function getSectionKind(number: number): BookSection["kind"] {
   if (number <= 11) return "backend";
   if (number <= 15) return "infrastructure";
   if (number <= 24) return "senior";
-  return "interview";
+  return "toolkit";
 }
 
 export function getBookSections(): BookSection[] {
@@ -110,7 +110,8 @@ export function getBookSections(): BookSection[] {
         slug: match[3],
       }));
 
-    return { title: rawTitle.trim(), kind: sectionKinds[index], parts };
+    const title = index === 5 ? "ส่วนที่ 6 — เครื่องมือทบทวนและต่อยอด" : rawTitle.trim();
+    return { title, kind: sectionKinds[index], parts };
   });
 }
 

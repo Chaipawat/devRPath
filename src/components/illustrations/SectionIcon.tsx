@@ -8,6 +8,6 @@ export function SectionIcon({ kind }: { kind: BookSection["kind"] }) {
     {kind === "backend" && <g {...common}><circle cx="32" cy="32" r="9" fill="#F4B393" /><circle cx="32" cy="32" r="3" /><path d="M32 15v6M32 43v6M15 32h6M43 32h6M20 20l4 4M40 40l4 4M44 20l-4 4M24 40l-4 4" /></g>}
     {kind === "infrastructure" && <g {...common}><path fill="#9CC5E0" d="m32 13 18 9-18 9-18-9 18-9Z" /><path fill="#F4B393" d="m14 31 18 9 18-9v11l-18 9-18-9V31Z" /><path d="m14 22 18 9 18-9M32 31v20" /></g>}
     {kind === "senior" && <g {...common}><path fill="#F4B393" d="M42 30c0 6-5 8-6 13h-8c-1-5-6-7-6-13a10 10 0 1 1 20 0Z" /><path d="M28 48h8M29 53h6M32 9v5M13 29h5M46 29h5M18 15l4 4M46 15l-4 4" /></g>}
-    {kind === "interview" && <g {...common}><rect x="15" y="19" width="34" height="29" rx="5" fill="#9CC5E0" /><path d="M25 19v-4h14v4M23 30h18M23 36h13M23 42h9" /><circle cx="42" cy="40" r="5" fill="#F4B393" /></g>}
+    {kind === "toolkit" && <g {...common}><path fill="#9CC5E0" d="M16 18h32v31H16z" /><path fill="#FAF8F4" d="M21 14h27v31H21z" /><path d="M21 14h27v31H21zM27 24h15M27 30h15M27 36h9M16 18v31h26" /><circle cx="42" cy="39" r="5" fill="#F4B393" /></g>}
   </svg>;
 }
