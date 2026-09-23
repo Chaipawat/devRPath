@@ -1,4 +1,4 @@
-const fallbackUrl = "https://devrpath.vercel.app";
+const fallbackUrl = "https://devpath-puce.vercel.app";
 
 export const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? fallbackUrl).replace(/\/$/, "");
 
