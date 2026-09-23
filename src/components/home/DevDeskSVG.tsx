@@ -11,7 +11,7 @@ const chips: [x: number, y: number, text: string, color: string][] = [
 
 export function DevDeskSVG() {
   return (
-    <svg className="dev-desk-svg" viewBox="0 0 600 520" role="img" aria-label="LATTE แมวส้มสะพายเป้ AI กำลังเขียนโค้ด">
+    <svg className="dev-desk-svg" viewBox="0 0 600 520" role="img" aria-label="Latte แมวส้มครีม กำลังเขียนโค้ด">
       <ellipse cx="300" cy="496" rx="250" ry="14" fill="#0e0e0e12" />
 
       {/* desk */}
@@ -70,10 +70,6 @@ export function DevDeskSVG() {
         <path d="M232 420c10-4 18-4 26 0M234 446c10-4 18-4 26 0M342 420c8-4 16-4 26 0M340 446c8-4 16-4 26 0" />
       </g>
       <ellipse cx="300" cy="404" rx="40" ry="52" fill="#fbeedd" />
-      <rect x="366" y="370" width="42" height="58" rx="15" fill="#a9b8dc" />
-      <rect x="372" y="378" width="30" height="42" rx="10" fill="#c9d3ec" />
-      <path d="M404 382v34" stroke="#62f3ff" strokeWidth="3" strokeLinecap="round" className="svg-led" />
-      <text x="387" y="408" textAnchor="middle" fill="#6f7fa8" style={{ font: "700 13px system-ui, sans-serif" }}>AI</text>
       <rect x="252" y="340" width="96" height="13" rx="6.5" fill="#e0782f" />
       <circle cx="300" cy="360" r="8.5" fill="#e3b33c" /><path d="M300 362v5" stroke="#3a2a10" strokeWidth="2" />
       <g className="svg-cat-head">
@@ -83,7 +79,7 @@ export function DevDeskSVG() {
         <path d="M286 244v14M300 240v16M314 244v14" stroke="#cf8645" strokeOpacity=".7" strokeWidth="5" strokeLinecap="round" />
         <ellipse cx="285" cy="316" rx="18" ry="13" fill="#fbeedd" /><ellipse cx="315" cy="316" rx="18" ry="13" fill="#fbeedd" />
         <g className="svg-blink">
-          <circle cx="273" cy="290" r="14" fill="#c9c46a" stroke="#2a2418" strokeWidth="2" /><circle cx="327" cy="290" r="14" fill="#c9c46a" stroke="#2a2418" strokeWidth="2" />
+          <circle cx="273" cy="290" r="14" fill="#a9b59d" stroke="#2a2418" strokeWidth="2" /><circle cx="327" cy="290" r="14" fill="#a9b59d" stroke="#2a2418" strokeWidth="2" />
           <ellipse cx="273" cy="290" rx="5" ry="10" fill="#15130e" /><ellipse cx="327" cy="290" rx="5" ry="10" fill="#15130e" />
           <circle cx="269" cy="285" r="3.5" fill="#fff" /><circle cx="323" cy="285" r="3.5" fill="#fff" />
         </g>
