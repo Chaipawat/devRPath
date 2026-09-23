@@ -2,11 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MarkdownContent } from "@/components/MarkdownContent";
-import { OnThisPage } from "@/components/OnThisPage";
+import { OnThisPage, OnThisPageMenu } from "@/components/OnThisPage";
 import { ProgressBar } from "@/components/ProgressBar";
 import { Sidebar } from "@/components/Sidebar";
 import { ReadingTracker } from "@/components/ReadingMemory";
-import { getAllParts, getPart, getSectionKind } from "@/lib/content";
+import { SiteFooter } from "@/components/SiteFooter";
+import { getAllParts, getPart, sectionLabels } from "@/lib/content";
 import { SectionIcon } from "@/components/illustrations/SectionIcon";
 
 export const dynamicParams = false;
@@ -25,10 +26,13 @@ export async function generateMetadata({ params }: PageProps<"/part/[slug]">): P
   } : {};
 }
 
+const pad = (number: number) => number.toString().padStart(2, "0");
+
 export default async function PartPage({ params }: PageProps<"/part/[slug]">) {
   const { slug } = await params;
   const part = getPart(slug);
   if (!part) notFound();
+  const sectionHeadings = part.headings.filter((heading) => heading.level === 2);
 
   return (
     <div className="reader-layout">
@@ -36,21 +40,37 @@ export default async function PartPage({ params }: PageProps<"/part/[slug]">) {
       <ProgressBar />
       <Sidebar parts={getAllParts()} activeSlug={slug} />
       <main id="main-content" className="reader-main">
-      <article className="book-content">
-        <header className="part-heading">
-          <SectionIcon kind={getSectionKind(part.number)} />
-          <div className="part-number" aria-hidden="true">{part.number.toString().padStart(2, "0")}</div>
-          <div><p>DEVPATH / PART {part.number.toString().padStart(2, "0")}</p><h1>{part.title}</h1></div>
-        </header>
-        <MarkdownContent>{part.content}</MarkdownContent>
-      </article>
-      <nav aria-label="บทก่อนหน้าและบทถัดไป" className="chapter-nav">
-        {part.previous ? <Link href={`/part/${part.previous.slug}`}>← PART {part.previous.number}<span>{part.previous.title}</span></Link> : <span />}
-        {part.next ? <Link href={`/part/${part.next.slug}`}>PART {part.next.number} →<span>{part.next.title}</span></Link> : <span />}
-      </nav>
-      <Link className="toc-return" href="/">← สารบัญ</Link>
+        <OnThisPageMenu headings={sectionHeadings} />
+        <article className="book-content">
+          <header className="part-heading">
+            <SectionIcon kind={part.kind} />
+            <div className="part-number" aria-hidden="true">{pad(part.number)}</div>
+            <div className="part-heading-copy">
+              <p>DEVPATH / PART {pad(part.number)}</p>
+              <h1>{part.title}</h1>
+              <p className="part-meta">{part.sectionCount} sections · ~{part.readMinutes} min read · ส่วน: {sectionLabels[part.kind]}</p>
+            </div>
+          </header>
+          <MarkdownContent>{part.content}</MarkdownContent>
+        </article>
+        <nav aria-label="บทก่อนหน้าและบทถัดไป" className="chapter-nav">
+          {part.previous ? (
+            <Link className="chapter-card is-prev" href={`/part/${part.previous.slug}`}>
+              <small><i aria-hidden="true">←</i> PART ก่อนหน้า</small>
+              <strong><span>{pad(part.previous.number)}</span>{part.previous.title}</strong>
+            </Link>
+          ) : <span />}
+          {part.next ? (
+            <Link className="chapter-card is-next" href={`/part/${part.next.slug}`}>
+              <small>PART ถัดไป <i aria-hidden="true">→</i></small>
+              <strong><span>{pad(part.next.number)}</span>{part.next.title}</strong>
+            </Link>
+          ) : <span />}
+        </nav>
+        <Link className="toc-return" href="/">← สารบัญ</Link>
+        <footer className="reader-footer"><SiteFooter /></footer>
       </main>
-      <OnThisPage headings={part.headings} />
+      <OnThisPage headings={sectionHeadings} />
     </div>
   );
 }

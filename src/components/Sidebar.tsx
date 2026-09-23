@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { LuMenu, LuX } from "react-icons/lu";
 import type { PartSummary } from "@/lib/content";
 import { PartIcon } from "@/components/PartIcon";
 
@@ -10,7 +11,7 @@ export function Sidebar({ parts, activeSlug }: { parts: PartSummary[]; activeSlu
   return (
     <>
       <button className="mobile-menu print-hidden" type="button" aria-expanded={open} aria-controls="book-sidebar" onClick={() => setOpen(!open)}>
-        <span aria-hidden="true">☰</span> สารบัญ
+        {open ? <LuX aria-hidden="true" /> : <LuMenu aria-hidden="true" />} สารบัญ
       </button>
       {open && <button className="sidebar-backdrop" aria-label="ปิดสารบัญ" onClick={() => setOpen(false)} />}
       <aside id="book-sidebar" className={`book-sidebar ${open ? "is-open" : ""}`}>

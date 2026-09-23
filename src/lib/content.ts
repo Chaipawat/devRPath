@@ -8,24 +8,39 @@ const contentDirectory = path.join(process.cwd(), "content");
 
 export type Heading = { level: 2 | 3; text: string; id: string };
 
+export type SectionKind = "foundation" | "frontend" | "backend" | "infrastructure" | "senior" | "toolkit";
+
 export type PartSummary = {
   number: number;
   slug: string;
   title: string;
   description: string;
+  kind: SectionKind;
+  keywordCount: number;
 };
 
 export type Part = PartSummary & {
   content: string;
   headings: Heading[];
+  sectionCount: number;
+  readMinutes: number;
   previous: PartSummary | null;
   next: PartSummary | null;
 };
 
 export type BookSection = {
   title: string;
-  kind: "foundation" | "frontend" | "backend" | "infrastructure" | "senior" | "toolkit";
+  kind: SectionKind;
   parts: PartSummary[];
+};
+
+export const sectionLabels: Record<SectionKind, string> = {
+  foundation: "Foundation",
+  frontend: "Frontend",
+  backend: "Backend",
+  infrastructure: "Infrastructure",
+  senior: "Senior",
+  toolkit: "Interview Toolkit",
 };
 
 function cleanInlineMarkdown(value: string) {
@@ -42,13 +57,44 @@ function partFiles() {
     .sort((a, b) => Number(a.slice(5, 7)) - Number(b.slice(5, 7)));
 }
 
+// The TOC lists every part in normal case ("Web Fundamentals"), while each file's H1 is uppercase.
+function tocTitles() {
+  const toc = fs.readFileSync(path.join(contentDirectory, "00-README-TOC.md"), "utf8");
+  return new Map(
+    [...toc.matchAll(/^\|\s*(\d+)\s*\|\s*([^|]+)\|/gm)].map((match) => [Number(match[1]), cleanInlineMarkdown(match[2])]),
+  );
+}
+
+// Body rows of the tables under the "Keywords" heading.
+function countKeywords(content: string) {
+  const section = content.split(/^##\s+\d+\.\s*Keywords?\b.*$/im)[1]?.split(/^##\s/m)[0] ?? "";
+  const rows = section.split("\n").filter((line) => line.startsWith("|"));
+  const separators = rows.filter((line) => /^\|[\s|:-]+\|$/.test(line)).length;
+  return Math.max(0, rows.length - separators * 2);
+}
+
+// Thai has no spaces between words, so estimate from characters outside code blocks.
+function estimateReadMinutes(content: string) {
+  const prose = content.replace(/```[\s\S]*?```/g, "").replace(/[#>*|`_-]/g, "");
+  const code = content.match(/```[\s\S]*?```/g)?.join("").length ?? 0;
+  return Math.max(1, Math.round(prose.length / 900 + code / 2400));
+}
+
 export function getAllParts(): PartSummary[] {
+  const titles = tocTitles();
   return partFiles().map((file) => {
     const content = fs.readFileSync(path.join(contentDirectory, file), "utf8");
     const number = Number(file.slice(5, 7));
     const rawTitle = content.match(/^#\s+(.+)$/m)?.[1] ?? `PART ${number}`;
-    const title = cleanInlineMarkdown(rawTitle.replace(/^PART\s+\d+\s*[—–-]\s*/i, ""));
-    return { number, slug: file.replace(/\.md$/, ""), title, description: "" };
+    const title = titles.get(number) ?? cleanInlineMarkdown(rawTitle.replace(/^PART\s+\d+\s*[—–-]\s*/i, ""));
+    return {
+      number,
+      slug: file.replace(/\.md$/, ""),
+      title,
+      description: "",
+      kind: getSectionKind(number),
+      keywordCount: countKeywords(content),
+    };
   });
 }
 
@@ -69,12 +115,14 @@ export function getPart(slug: string): Part | null {
     ...summary,
     content,
     headings,
+    sectionCount: headings.filter((heading) => heading.level === 2).length,
+    readMinutes: estimateReadMinutes(content),
     previous: summaries[index - 1] ?? null,
     next: summaries[index + 1] ?? null,
   };
 }
 
-const sectionKinds: BookSection["kind"][] = [
+const sectionKinds: SectionKind[] = [
   "foundation",
   "frontend",
   "backend",
@@ -83,7 +131,7 @@ const sectionKinds: BookSection["kind"][] = [
   "toolkit",
 ];
 
-export function getSectionKind(number: number): BookSection["kind"] {
+export function getSectionKind(number: number): SectionKind {
   if (number <= 2) return "foundation";
   if ([3, 4, 12].includes(number)) return "frontend";
   if (number <= 11) return "backend";

@@ -3,6 +3,8 @@ import { IBM_Plex_Sans_Thai, IBM_Plex_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import "../styles/cinematic.css";
+import "../styles/polish.css";
+import "../styles/home-dev.css";
 import { siteDescription, siteName, siteUrl } from "@/lib/site";
 
 const sans = IBM_Plex_Sans_Thai({
@@ -53,16 +55,6 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full flex flex-col">
         <a className="skip-link" href="#main-content">ข้ามไปเนื้อหา</a>
         {children}
-        <p className="site-copyright">© 2026 Chaipawat. All rights reserved.</p>
-        <a
-          className="creator-mark"
-          href="https://github.com/Chaipawat"
-          target="_blank"
-          rel="noreferrer"
-          aria-label="สร้างโดย Chaipawat — เปิด GitHub ในแท็บใหม่"
-        >
-          <span>BUILT BY</span> CHAIPAWAT <i aria-hidden="true">↗</i>
-        </a>
         <Analytics />
       </body>
     </html>
